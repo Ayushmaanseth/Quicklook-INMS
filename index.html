@@ -4,10 +4,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Quicklook - INMS</title>
 
+  <script src="https://unpkg.com/dropbox/dist/Dropbox-sdk.min.js"></script>
   <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
   <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
   <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
-  <script src="https://unpkg.com/dropbox/dist/Dropbox-sdk.min.js"></script>
 
 
 </head>
@@ -32,6 +32,7 @@
     temp = temp.replace("/","-");
     var final_date = temp + ".png";
     var full_final = '';
+    console.log(final_date);
 
 
    const dbx = new Dropbox.Dropbox({
@@ -58,7 +59,7 @@
            var x = response.url;
             x = x.slice(0, -4);
             x = x + 'raw=1';
-            console.log(x);
+            
             var img = document.getElementById("uniqueId");
             img.setAttribute('src',x);
           })
