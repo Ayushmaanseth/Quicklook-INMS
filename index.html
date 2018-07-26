@@ -52,9 +52,8 @@
             x = x.slice(0, -4);
             x = x + 'raw=1';
             console.log(x);
-            var img = document.createElement("IMG");
+            var img = document.getElementById("uniqueId");
             img.setAttribute('src',x);
-            document.body.appendChild(img);
           })
          .catch(error => {
            console.log(error);
@@ -83,7 +82,7 @@
 
 <p>Date: <input type="text" id="datepicker"></p>
 <button onclick="func()" type="button">Submit</button>
-<img id="uniqueId" src="https://www.dropbox.com/s/gcm63xbl0ujoixh/7-1-2018.png?dl=0">
+<img id="uniqueId">
 
 </body>
 <script src="https://unpkg.com/dropbox/dist/Dropbox-sdk.min.js"></script>
