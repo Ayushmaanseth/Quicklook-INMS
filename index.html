@@ -6,6 +6,7 @@
 
   <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
   <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+  <script src="https://unpkg.com/dropbox/dist/Dropbox-sdk.min.js"></script>
   <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
 
   <script>
@@ -30,9 +31,10 @@
    const dbx = new Dropbox.Dropbox({
      accessToken:'2UGDrS5GIrAAAAAAAAAAFmefQS7EMl3qGsDBMSj24jfjo7S8EG-iWhTxrCDH-GPZ'
    });
-   
+
      dbx.sharingCreateSharedLink({path: full_final})
      .then(response => {
+       console.log(response.url);
        var x = response.url;
        x = x.slice(0, -4);
        x = x + 'raw=1';
@@ -47,7 +49,7 @@
 
      //console.log(file);
 
-  };
+  }
 </script>
 
 </head>
@@ -55,9 +57,9 @@
 
 <p>Date: <input type="text" id="datepicker"></p>
 <button onclick="func()" type="button">Submit</button>
-<img id="uniqueId" src="https://www.dropbox.com/s/gcm63xbl0ujoixh/7-1-2018.png?dl=0">
+<img id="uniqueId">
 
 </body>
-<script src="https://unpkg.com/dropbox/dist/Dropbox-sdk.min.js"></script>
+
 <!--script src="helper.js"></script-->
 </html>
