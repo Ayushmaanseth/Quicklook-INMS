@@ -8,6 +8,12 @@
   <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
   <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
 
+
+</head>
+<body>
+
+<p>Date: <input type="text" id="datepicker"></p>
+
   <script>
   var img_src;
   $( function() {
@@ -60,8 +66,7 @@
          });
        }
        else {
-         var img = document.getElementById("uniqueId");
-            img.setAttribute('src','hello');
+         document.write("not available");
        }
      })
 
@@ -72,16 +77,8 @@
 
 
 
-
-     //console.log(file);
-
   };
 </script>
-
-</head>
-<body>
-
-<p>Date: <input type="text" id="datepicker"></p>
 <button onclick="func()" type="button">Submit</button>
 <img id="uniqueId">
 
