@@ -52,16 +52,16 @@
             x = x.slice(0, -4);
             x = x + 'raw=1';
             console.log(x);
-            var img = document.getElementById('uniqueId');
+            var img = document.createElement("IMG");
             img.setAttribute('src',x);
+            document.body.appendChild(img);
           })
          .catch(error => {
            console.log(error);
          });
        }
        else {
-         var img = document.getElementById('uniqueId');
-         img.setAttribute('src',"hello");
+         document.write("Not Available");
        }
      })
 
