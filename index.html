@@ -6,7 +6,6 @@
 
   <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
   <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
-  <script src="https://unpkg.com/dropbox/dist/Dropbox-sdk.min.js"></script>
   <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
 
   <script>
@@ -25,31 +24,58 @@
     temp = temp.replace("/","-");
     temp = temp.replace("/","-");
     var final_date = temp + ".png";
-    var full_final = '/download_INMS_data/' + final_date;
+    var full_final = '';
 
 
    const dbx = new Dropbox.Dropbox({
      accessToken:'2UGDrS5GIrAAAAAAAAAAFmefQS7EMl3qGsDBMSj24jfjo7S8EG-iWhTxrCDH-GPZ'
    });
 
-     dbx.sharingCreateSharedLink({path: full_final})
-     .then(response => {
-       console.log(response.url);
-       var x = response.url;
-       x = x.slice(0, -4);
-       x = x + 'raw=1';
-       console.log(x);
-       var img = document.getElementById('uniqueId');
-       img.setAttribute('src',x);
+   dbx.filesListFolder({path: '/download_inms_data'})
+       .then(response => {
+         //console.log(response.entries);
+         var filenames = response.entries.map((obj)=>obj.name);
+         var i;
+         for(i = 0;i < filenames.length; i++)
+         {
+           if(final_date == filenames[i])
+           {
+             full_final = '/download_INMS_data/' + final_date;
+           }
+
+         }
+         if(full_final != '')
+         {
+         dbx.sharingCreateSharedLink({path: full_final})
+         .then(response => {
+           var x = response.url;
+            x = x.slice(0, -4);
+            x = x + 'raw=1';
+            console.log(x);
+            var img = document.getElementById('uniqueId');
+            img.setAttribute('src',x);
+          })
+         .catch(error => {
+           console.log(error);
+         });
+       }
+       else {
+         var img = document.getElementById('uniqueId');
+         img.setAttribute('src',"hello");
+       }
      })
-     .catch(error => {
-       console.log(error);
-     });
+
+       .catch(error => {
+         console.log(error);
+       }
+     );
+
+
 
 
      //console.log(file);
 
-  }
+  };
 </script>
 
 </head>
@@ -57,9 +83,9 @@
 
 <p>Date: <input type="text" id="datepicker"></p>
 <button onclick="func()" type="button">Submit</button>
-<img id="uniqueId">
+<img id="uniqueId" src="https://www.dropbox.com/s/gcm63xbl0ujoixh/7-1-2018.png?dl=0">
 
 </body>
-
+<script src="https://unpkg.com/dropbox/dist/Dropbox-sdk.min.js"></script>
 <!--script src="helper.js"></script-->
 </html>
