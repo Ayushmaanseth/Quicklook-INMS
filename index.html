@@ -25,6 +25,8 @@
 
     var v = $( "#datepicker" ).datepicker('getDate');
     var date = v.toLocaleString();
+    console.log(v);
+    console.log(date);
     var formatted_date = date.split(',');
     //alert(formatted_date);
     var temp = formatted_date[0];
@@ -68,7 +70,10 @@
          });
        }
        else {
-         document.write("not available");
+         //document.write("not available");
+         var img = document.getElementById("uniqueId");
+            img.setAttribute('src',"hello");
+         
        }
      })
 
