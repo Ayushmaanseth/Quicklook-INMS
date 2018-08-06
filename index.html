@@ -8,7 +8,7 @@
   <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
   <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
   <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
-  
+
 </head>
 <body>
 
@@ -16,10 +16,12 @@
 
   <script>
   var img_src;
+  var store = '';
   $( function() {
     $( "#datepicker" ).datepicker();
 
   } );
+
   function func() {
 
     var v = $( "#datepicker" ).datepicker('getDate');
@@ -43,7 +45,12 @@
     var final_date = date + '-' + month + '-' + year + '.png';
     var full_final = '';
     var flag = false;
+    var flag2 = false;
     console.log(final_date);
+    var month_char = [{1:'JAN'},{2:'FEB'},{3:'MAR'},{4:'APR'},{5:'MAY'},{6:'JUN'},{7:'JUL'},{8:'AUG'},{9:'SEP'},{10:'OCT'},{11:'NOV'},{12:'DEC'}]; 
+    var full_final_tle = date + '-' + month_char[month-1][month] + '-' + year + '.png';
+    
+    console.log(full_final_tle);
 
    const dbx = new Dropbox.Dropbox({
      accessToken:'2UGDrS5GIrAAAAAAAAAALnI_6-gut0jZopzRla2kDG1HO0wSYyY3_I0uSsyNC5xh'
@@ -54,15 +61,55 @@
          //console.log(response.entries);
          var filenames = response.entries.map((obj)=>obj.name);
          var i;
+         for(i = 0;i < filenames.length;i++)
+         {
+          if (filenames[i][0] == '#')
+          {
+
+            var split_file = filenames[i].split('_')[0].split(' ')[1];
+            var temp_year = split_file.slice(0,2);
+            temp_year = '20' + temp_year;
+            var temp_month = split_file.slice(2,4);
+            if(temp_month[0] == '0')
+            {
+              temp_month = temp_month.slice(1,);
+            }
+            var temp_date = split_file.slice(4,6);
+            if(temp_date[0] == '0')
+            {
+             temp_date =  temp_date.slice(1,);
+            }
+            //console.log(temp_date,temp_month,temp_year);
+           //console.log(temp_date + '-' + temp_month + '-' + temp_year + '.png' )
+           if(final_date == (temp_date + '-' + temp_month + '-' + temp_year + '.png'))
+           {
+              store = full_final_tle;
+              break;
+           }
+          }
+         }
          for(i = 0;i < filenames.length; i++)
          {
            if(final_date == filenames[i])
            {
              var full_final = '/download_INMS_data/' + final_date;
              flag = true;
+             break;
            }
 
          }
+
+         for(i = 0;i < filenames.length; i++)
+         {
+           if(full_final_tle == filenames[i])
+           {
+             
+             flag2 = true;
+             break;
+           }
+
+         }
+
          if(flag == true)
          {
          dbx.sharingCreateSharedLink({path: full_final})
@@ -93,21 +140,122 @@
          });
 
        }
+
+       if(flag2 == true)
+         {
+         dbx.sharingCreateSharedLink({path: '/download_INMS_data/' + full_final_tle})
+         .then(response => {
+           var x = response.url;
+            x = x.slice(0, -4);
+            x = x + 'raw=1';
+
+            var img = document.getElementById("anotherId");
+            img.setAttribute('src',x);
+          })
+         .catch(error => {
+           console.log(error);
+         });
+       }
+       else {
+         dbx.sharingCreateSharedLink({path: '/download_INMS_data/default.jpg'})
+         .then(response => {
+           var x = response.url;
+            x = x.slice(0, -4);
+            x = x + 'raw=1';
+
+            var img = document.getElementById("anotherId");
+            img.setAttribute('src',x);
+          })
+         .catch(error => {
+           console.log(error);
+         });
+
+       }
+
      })
 
        .catch(error => {
          console.log(error);
        }
      );
+     }
 
+    function func2()
+    {   
+        console.log("here is",store);
+       const dbx = new Dropbox.Dropbox({
+     accessToken:'2UGDrS5GIrAAAAAAAAAALnI_6-gut0jZopzRla2kDG1HO0wSYyY3_I0uSsyNC5xh'
+   });
+    dbx.filesDownload({path:'/download_INMS_data/TLE_data/PHOENIX-' + store.slice(0,-4) +'.txt'})
+      .then(function (response){
+        
+        var blob = response.fileBlob;
+        var reader = new FileReader();
+        reader.addEventListener("loadend",function(){
+          //console.log(reader.result);
+        var text = reader.result;
+        text = text.split('\n');
+        var final = [];
+        for(var i = 0;i<text.length;i++)
+        {
+          var temp = {center : {lat:parseFloat(text[i].split(' ')[1]),lng:parseFloat(text[i].split(' ')[0])}};
+          final.push(temp);
+         //console.log(temp);
+        }  
+        final = final.slice(0,90);
+        var map = new google.maps.Map(document.getElementById('map'), {
+          zoom: 4,
+          center: {lat: 37.090, lng: -95.712},
+          mapTypeId: 'terrain'
+        });
+          var i;
+          for(i = 0;i < final.length;i++)
+          {
+          // Add the circle for this city to the map.
+          var cityCircle = new google.maps.Circle({
+            strokeColor: '#FF0000',
+            strokeOpacity: 0.8,
+            strokeWeight: 2,
+            fillColor: '#FF0000',
+            fillOpacity: 0.35,
+            map: map,
+            center: final[i].center,
+            radius: 20000
+          });
+        }
 
+        });
+        reader.readAsText(blob);
 
-  };
+        
+      })
+      .catch(function (error){
+        console.log(error);
+      });
+        // Create the map.
+        
+      }
+
+        // Construct the circle for each value in citymap.
+        // Note: We scale the area of the circle based on the population.
+        
+  
+  
 </script>
 <button onclick="func()" type="button">Submit</button>
-<img id="uniqueId">
-
+<img id="uniqueId" height="350" width="500">
+<img id = "anotherId" height="350" width="500">
+<button onclick="func2()" type="button">Show Map</button>
+<style>
+      /* Always set the map height explicitly to define the size of the div
+       * element that contains the map. */
+      #map {
+        height: 100%;
+      }
+  </style>
+ <div id="map"></div>
 </body>
-
-<!--script src="helper.js"></script-->
+<script async defer
+    src="https://maps.googleapis.com/maps/api/js?callback=func2">
+    </script>
 </html>
