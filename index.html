@@ -16,14 +16,15 @@
 
   <script>
   var img_src;
-  var store = '';
+  var store;
+  var flag3 = true;
   $( function() {
     $( "#datepicker" ).datepicker();
 
   } );
 
   function func() {
-
+    store = '';
     var v = $( "#datepicker" ).datepicker('getDate');
     var year = v.getFullYear()
     var month = v.getMonth();
@@ -46,6 +47,7 @@
     var full_final = '';
     var flag = false;
     var flag2 = false;
+    flag3 = false;
     console.log(final_date);
     var month_char = [{1:'JAN'},{2:'FEB'},{3:'MAR'},{4:'APR'},{5:'MAY'},{6:'JUN'},{7:'JUL'},{8:'AUG'},{9:'SEP'},{10:'OCT'},{11:'NOV'},{12:'DEC'}]; 
     var full_final_tle = date + '-' + month_char[month-1][month] + '-' + year + '.png';
@@ -84,6 +86,7 @@
            if(final_date == (temp_date + '-' + temp_month + '-' + temp_year + '.png'))
            {
               store = full_final_tle;
+              flag3 = true;
               break;
            }
           }
@@ -186,6 +189,8 @@
        const dbx = new Dropbox.Dropbox({
      accessToken:'2UGDrS5GIrAAAAAAAAAALnI_6-gut0jZopzRla2kDG1HO0wSYyY3_I0uSsyNC5xh'
    });
+       if (flag3 == true)
+       {
     dbx.filesDownload({path:'/download_INMS_data/TLE_data/PHOENIX-' + store.slice(0,-4) +'.txt'})
       .then(function (response){
         
@@ -235,6 +240,11 @@
         // Create the map.
         
       }
+      else
+      {
+        alert("map not available");
+      }
+    }
 
         // Construct the circle for each value in citymap.
         // Note: We scale the area of the circle based on the population.
