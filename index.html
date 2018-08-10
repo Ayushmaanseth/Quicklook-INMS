@@ -11,13 +11,41 @@
 
 </head>
 <body>
-
+<h1 align="center"> <strong> UCL MSSL Quicklook - INMS</strong></h1>
 <p>Date: <input type="text" id="datepicker"></p>
 
   <script>
-  var img_src;
+    var next_day;
+    var next_month;
+    var unique_lat;
+    var unique_lon;
+    var trapper;
+  function GetPrevious(next_month,next_day)
+  {
+    if(next_day == 1)
+    {
+      if(next_month == 1 || next_month == 3 || next_month == 5 || next_month == 7 || next_month == 8 || next_month == 10 || next_month == 12)
+      {
+      next_day = 31;
+      next_month--;
+    }
+    else
+    {
+      next_day = 30;
+      next_month--;
+    }
+  }
+    else
+    {
+      next_day--;
+    }
+  }
   var store;
   var flag3 = true;
+  var temp_filename;
+  
+  var temp_final_time;
+
   $( function() {
     $( "#datepicker" ).datepicker();
 
@@ -25,6 +53,8 @@
 
   function func() {
     store = '';
+    temp_filename = '';
+    temp_final_time = '';
     var v = $( "#datepicker" ).datepicker('getDate');
     var year = v.getFullYear()
     var month = v.getMonth();
@@ -37,7 +67,7 @@
 
     if(month[0] == '0')
     {
-      month = month.slice(1,1);
+      month = month.slice(1,);
     }
     console.log(v);
     console.log(year);
@@ -51,6 +81,23 @@
     console.log(final_date);
     var month_char = [{1:'JAN'},{2:'FEB'},{3:'MAR'},{4:'APR'},{5:'MAY'},{6:'JUN'},{7:'JUL'},{8:'AUG'},{9:'SEP'},{10:'OCT'},{11:'NOV'},{12:'DEC'}]; 
     var full_final_tle = date + '-' + month_char[month-1][month] + '-' + year + '.png';
+    next_day = parseInt(--date).toString();
+    next_month = month_char[month-1][month];
+    if (next_day == 0 )
+    {
+      if(month - 1 == 1 || month - 1 == 3 || month - 1 == 5 || month - 1 == 7 || month - 1 == 8 || month - 1 == 10 || month - 1 == 12)
+      {
+      next_day = 31;
+      next_month = month_char[month-2][month-1];
+      }
+      else
+      {
+        next_day = 30;
+      next_month = month_char[month-2][month-1];
+      }
+    }
+    var full_final_for_tle = next_day + '-' + next_month + '-' + year + '.png';
+
     
     console.log(full_final_tle);
 
@@ -81,11 +128,16 @@
             {
              temp_date =  temp_date.slice(1,);
             }
+
+            
+            
             //console.log(temp_date,temp_month,temp_year);
            //console.log(temp_date + '-' + temp_month + '-' + temp_year + '.png' )
            if(final_date == (temp_date + '-' + temp_month + '-' + temp_year + '.png'))
-           {
-              store = full_final_tle;
+           {  
+              store = full_final_for_tle;
+              console.log(store);
+              temp_filename = filenames[i];
               flag3 = true;
               break;
            }
@@ -191,29 +243,81 @@
    });
        if (flag3 == true)
        {
+        dbx.filesDownload({path:'/download_INMS_data/' + temp_filename + '/TimeInfo.txt'})
+        .then(function(response)
+        {
+          var blob = response.fileBlob;
+        var reader = new FileReader();
+        reader.addEventListener("loadend",function(){
+
+          var text = reader.result;
+          text = text.split('\n');
+          //console.log(text[2]);
+          var temp_next_date = text[2].split(' ')[3];
+          var temp_next_time = text[2].split(' ')[4];
+          var temp_next_year = temp_next_date.split('/')[0];
+          var temp_next_month = temp_next_date.split('/')[1];
+          var temp_next_day = temp_next_date.split('/')[2];
+
+          temp_final_time = temp_next_time;
+          
+          temp_final_time = temp_final_time.slice(0,-3);
+          console.log("hello world",  temp_final_time);
+        })
+         reader.readAsText(blob);
+
+      })
     dbx.filesDownload({path:'/download_INMS_data/TLE_data/PHOENIX-' + store.slice(0,-4) +'.txt'})
       .then(function (response){
         
         var blob = response.fileBlob;
         var reader = new FileReader();
+        
         reader.addEventListener("loadend",function(){
           //console.log(reader.result);
         var text = reader.result;
         text = text.split('\n');
         var final = [];
+        
         for(var i = 0;i<text.length;i++)
         {
-          var temp = {center : {lat:parseFloat(text[i].split(' ')[1]),lng:parseFloat(text[i].split(' ')[0])}};
+           if(temp_final_time == text[i].split(' ')[0].slice(0,-3))
+          {
+            //console.log("hey, i found the shit")
+            //console.log(temp_final_time,text[i].split(' ')[0].slice(0,-3))
+            unique_lat = parseFloat(text[i].split(' ')[2]);
+            unique_lon = parseFloat(text[i].split(' ')[1]);
+            console.log(unique_lon,unique_lat);
+            trapper = i;
+            console.log(trapper);
+            
+
+          }
+          //console.log(text[i].split(' ')[0]);
+          var temp = {center : {lat:parseFloat(text[i].split(' ')[2]),lng:parseFloat(text[i].split(' ')[1])}};
           final.push(temp);
          //console.log(temp);
         }  
-        final = final.slice(0,90);
+        final = final.slice(trapper-45,trapper+45);
+        console.log(unique_lon,unique_lat)
+        console.log(final.length)
         var map = new google.maps.Map(document.getElementById('map'), {
           zoom: 4,
-          center: {lat: 37.090, lng: -95.712},
+          center: {lat: unique_lat, lng: unique_lon},
           mapTypeId: 'terrain'
         });
           var i;
+           var hello = new google.maps.Circle({
+            strokeColor: '#000000',
+            strokeOpacity: 0.8,
+            strokeWeight: 2,
+            fillColor: '#FF0000',
+            fillOpacity: 0.35,
+            map: map,
+            center: {lat:unique_lat,lng:unique_lon},
+            radius: 100000
+          });
+
           for(i = 0;i < final.length;i++)
           {
           // Add the circle for this city to the map.
@@ -235,6 +339,7 @@
         
       })
       .catch(function (error){
+        alert("map not available")
         console.log(error);
       });
         // Create the map.
